@@ -9,7 +9,16 @@ import {
 import React from "react";
 
 export const ProductListView = () => {
-  const { dataGridProps } = useDataGrid({});
+  const { dataGridProps } = useDataGrid({
+    sorters: {
+      initial: [
+        {
+          field: "id",
+          order: "desc",
+        },
+      ],
+    },
+  });
 
   const columns = React.useMemo<GridColDef[]>(
     () => [

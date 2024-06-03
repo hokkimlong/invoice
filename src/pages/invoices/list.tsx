@@ -9,7 +9,16 @@ import {
 import React from "react";
 
 export const InvoiceList = () => {
-  const { dataGridProps } = useDataGrid({});
+  const { dataGridProps } = useDataGrid({
+    sorters: {
+      initial: [
+        {
+          field: "id",
+          order: "desc",
+        },
+      ],
+    },
+  });
 
   const columns = React.useMemo<GridColDef[]>(
     () => [
@@ -46,7 +55,7 @@ export const InvoiceList = () => {
         minWidth: 200,
         renderCell: function render({ row }) {
           return (
-            <div>
+            <div style={{padding:"10px 0"}}>
               {row.products.map((product: any) => (
                 <div>{`${product.product.name} - ${product.variant.name} x ${product.quantity}`}</div>
               ))}
@@ -62,7 +71,7 @@ export const InvoiceList = () => {
           return (
             <>
               <EditButton hideText recordItemId={row.id} />
-              <ShowButton hideText recordItemId={row.id} />
+              {/* <ShowButton hideText recordItemId={row.id} /> */}
               <DeleteButton hideText recordItemId={row.id} />
             </>
           );
@@ -77,7 +86,7 @@ export const InvoiceList = () => {
 
   return (
     <List>
-      <DataGrid {...dataGridProps} columns={columns} autoHeight />
+      <DataGrid {...dataGridProps} getRowHeight={() => 'auto'} columns={columns} autoHeight />
     </List>
   );
 };

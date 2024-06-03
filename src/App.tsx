@@ -38,7 +38,7 @@ import {
   CustomerShow,
 } from "./pages/customers";
 import { supabaseClient } from "./utility";
-import { InvoiceCreate, InvoiceList, InvoiceShow } from "./pages/invoices";
+import { InvoiceCreate, InvoiceEdit, InvoiceList, InvoiceShow } from "./pages/invoices";
 
 function App() {
   return (
@@ -135,7 +135,7 @@ function App() {
                     <Route path="/invoices">
                       <Route index element={<InvoiceList />} />
                       <Route path="create" element={<InvoiceCreate />} />
-                      <Route path="edit/:id" element={<InvoiceCreate />} />
+                      <Route path="edit/:id" element={<InvoiceEdit />} />
                       <Route path="show/:id" element={<InvoiceShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
