@@ -158,16 +158,10 @@ function App() {
                           title={
                             <ThemedTitleV2
                               collapsed={false}
-                              text="Refine Project"
+                              text="Invoice"
                               icon={<AppIcon />}
                             />
                           }
-                          formProps={{
-                            defaultValues: {
-                              email: "info@refine.dev",
-                              password: "refine-supabase",
-                            },
-                          }}
                         />
                       }
                     />

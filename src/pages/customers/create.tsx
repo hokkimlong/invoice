@@ -1,4 +1,4 @@
-import { Box, TextField } from "@mui/material";
+import { Box, TextField, Typography } from "@mui/material";
 import { Create } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
 
@@ -65,6 +65,33 @@ export const CustomerForm = ({ register, errors }: any) => (
       name="address"
       multiline
       rows={4}
+    />
+    <Typography>Other</Typography>
+    <TextField
+      {...register("taxi_phone", {
+        required: "This field is required",
+      })}
+      error={!!(errors as any)?.taxi_phone}
+      helperText={(errors as any)?.taxi_phone?.message}
+      margin="normal"
+      fullWidth
+      InputLabelProps={{ shrink: true }}
+      type="text"
+      label={"Taxi Phone"}
+      name="taxi_phone"
+    />
+    <TextField
+      {...register("sale_name", {
+        required: "This field is required",
+      })}
+      error={!!(errors as any)?.sale_name}
+      helperText={(errors as any)?.sale_name?.message}
+      margin="normal"
+      fullWidth
+      InputLabelProps={{ shrink: true }}
+      type="text"
+      label={"Sale Name"}
+      name="sale_name"
     />
   </>
 );

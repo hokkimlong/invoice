@@ -27,6 +27,14 @@ export const CustomerShow = () => {
           {"Address"}
         </Typography>
         <TextField value={record?.address} />
+        <Typography variant="body1" fontWeight="bold">
+          {"Taxi Phone"}
+        </Typography>
+        <TextField value={record?.taxi_phone} />
+        <Typography variant="body1" fontWeight="bold">
+          {"Sale Name"}
+        </Typography>
+        <TextField value={record?.sale_name} />
       </Stack>
     </Show>
   );

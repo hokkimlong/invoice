@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { Edit } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
-import { CustomerForm } from "./create";
+import { InvoiceForm } from "./create";
 
 export const InvoiceEdit = () => {
   const {
@@ -17,7 +17,7 @@ export const InvoiceEdit = () => {
         sx={{ display: "flex", flexDirection: "column" }}
         autoComplete="off"
       >
-        <CustomerForm register={register} errors={errors} />
+        <InvoiceForm register={register} errors={errors} />
       </Box>
     </Edit>
   );

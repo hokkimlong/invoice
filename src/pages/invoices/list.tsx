@@ -20,22 +20,39 @@ export const InvoiceList = () => {
         minWidth: 50,
       },
       {
-        field: "name",
+        field: "invoice_number",
         flex: 1,
-        headerName: "Name",
-        minWidth: 200,
+        headerName: "Invoice Number",
+        minWidth: 100,
       },
       {
-        field: "phone",
+        field: "customer",
         flex: 1,
-        headerName: "Phone",
+        headerName: "Customer",
         minWidth: 200,
+        renderCell: function render({ row }) {
+          return (
+            <div>
+              <div>{`${row.customer?.name} - ${row.customer?.phone}`}</div>
+              <div>{row.customer.address}</div>
+            </div>
+          );
+        },
       },
       {
-        field: "address",
+        field: "products",
         flex: 1,
-        headerName: "Address",
+        headerName: "Product",
         minWidth: 200,
+        renderCell: function render({ row }) {
+          return (
+            <div>
+              {row.products.map((product: any) => (
+                <div>{`${product.product.name} - ${product.variant.name} x ${product.quantity}`}</div>
+              ))}
+            </div>
+          );
+        },
       },
       {
         field: "actions",
