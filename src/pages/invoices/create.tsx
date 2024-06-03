@@ -93,7 +93,7 @@ const formatPrice = (price: any, riel = false) => {
 export const DownloadInvoiceButton = ({ getValues }: any) => {
   const generateDocument = () => {
     loadFile(
-      "/public/template/template.docx",
+      "/template/template.docx",
       function (error: any, content: any) {
         if (error) {
           throw error;
