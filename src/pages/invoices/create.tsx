@@ -20,7 +20,7 @@ export const InvoiceCreate = () => {
     getValues,
     formState: { errors },
     watch,
-    setValue
+    setValue,
   } = useForm({
     defaultValues: {
       exchange_rate: 4045,
@@ -76,90 +76,93 @@ import { saveAs } from "file-saver";
 import currencyFormatter from "currency-formatter";
 import Big from "big.js";
 
-function loadFile(url, callback) {
+function loadFile(url: any, callback: any) {
   PizZipUtils.getBinaryContent(url, callback);
 }
 
-const formatPrice = (price,riel=false) => {
+const formatPrice = (price: any, riel = false) => {
   return currencyFormatter.format(price.toNumber(), {
-    symbol: riel? '៛':'$',
-    decimal: '.',
-    thousand: ',',
+    symbol: riel ? "៛" : "$",
+    decimal: ".",
+    thousand: ",",
     precision: riel ? 0 : 2,
-    format: '%v%s' // %s is the symbol and %v is the value
+    format: "%v%s", // %s is the symbol and %v is the value
   });
 };
 
-export const DownloadInvoiceButton = ({ getValues }) => {
+export const DownloadInvoiceButton = ({ getValues }: any) => {
   const generateDocument = () => {
-    loadFile("/public/template/template.docx", function (error, content) {
-      if (error) {
-        throw error;
-      }
-      const zip = new PizZip(content);
-      const doc = new Docxtemplater(zip, {
-        paragraphLoop: true,
-        linebreaks: true,
-      });
-      const value = getValues();
-      let totalPrice = new Big(0);
-      const products = value.products.map((product, index) => {
-
-        const productTotalPrice = new Big(product.variant.price).times(
-          product.quantity
-        );
-        totalPrice = totalPrice.add(productTotalPrice);
-        return{
-        index: index + 1,
-        product_name: product.product.name,
-        variant_name: product.variant.name,
-        variant_unit: product.variant.unit,
-        variant_price: formatPrice(new Big(product.variant.price)),
-        quantity: product.quantity,
-        total_price: formatPrice(
-          productTotalPrice
-        ),
+    loadFile(
+      "/public/template/template.docx",
+      function (error: any, content: any) {
+        if (error) {
+          throw error;
         }
-      });
+        const zip = new PizZip(content);
+        const doc = new Docxtemplater(zip, {
+          paragraphLoop: true,
+          linebreaks: true,
+        });
+        const value = getValues();
+        let totalPrice = new Big(0);
+        const products = value.products.map((product: any, index: any) => {
+          const productTotalPrice = new Big(product.variant.price).times(
+            product.quantity
+          );
+          totalPrice = totalPrice.add(productTotalPrice);
+          return {
+            index: index + 1,
+            product_name: product.product.name,
+            variant_name: product.variant.name,
+            variant_unit: product.variant.unit,
+            variant_price: formatPrice(new Big(product.variant.price)),
+            quantity: product.quantity,
+            total_price: formatPrice(productTotalPrice),
+          };
+        });
 
-      if (products.length < 8) {
-        const diff = 8 - products.length;
-        for (let i = 0; i < diff; i++) {
-          products.push({
-            index: "",
-            product_name: "",
-            variant_name: "",
-            variant_unit: "",
-            variant_price: "",
-            quantity: "",
-            total_price: "",
-          });
+        if (products.length < 8) {
+          const diff = 8 - products.length;
+          for (let i = 0; i < diff; i++) {
+            products.push({
+              index: "",
+              product_name: "",
+              variant_name: "",
+              variant_unit: "",
+              variant_price: "",
+              quantity: "",
+              total_price: "",
+            });
+          }
         }
-      }
 
-      const date = new Date();
-      doc.render({
-        invoice_number: value.invoice_number,
-        sale_name: value.customer.sale_name,
-        customer_name: value.customer.name,
-        customer_phone: value.customer.phone,
-        customer_address: value.customer.address,
-        exchange_rate: value.exchange_rate,
-        taxi_phone: value.customer.taxi_phone,
-        products: products,
-        total_price_usd: formatPrice(totalPrice),
-        total_price_riel: formatPrice(totalPrice.times(value.exchange_rate),true),
-        year: date.getFullYear(),
-        month: date.getMonth() + 1,
-        day: date.getDate(),
-      });
-      const out = doc.getZip().generate({
-        type: "blob",
-        mimeType:
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      }); //Output the document using Data-URI
-      saveAs(out, "output.docx");
-    });
+        const date = new Date();
+        doc.render({
+          invoice_number: value.invoice_number,
+          sale_name: value.customer.sale_name,
+          customer_name: value.customer.name,
+          customer_phone: value.customer.phone,
+          customer_address: value.customer.address,
+          exchange_rate: value.exchange_rate,
+          taxi_phone: value.customer.taxi_phone,
+          products: products,
+          total_price_usd: formatPrice(totalPrice),
+          total_price_riel: formatPrice(
+            totalPrice.times(value.exchange_rate),
+            true
+          ),
+          year: date.getFullYear(),
+          month: date.getMonth() + 1,
+          day: date.getDate(),
+        });
+        const out = doc.getZip().generate({
+          type: "blob",
+          mimeType:
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }); //Output the document using Data-URI
+        saveAs(out, "output.docx");
+      }
+    );
   };
 
   return (
@@ -170,7 +173,13 @@ export const DownloadInvoiceButton = ({ getValues }) => {
     </Box>
   );
 };
-export const InvoiceForm = ({ register, errors, control, watch,setValue }: any) => {
+export const InvoiceForm = ({
+  register,
+  errors,
+  control,
+  watch,
+  setValue,
+}: any) => {
   const { autocompleteProps: customerAutocompleteProps } = useAutocomplete({
     resource: "customers",
     onSearch: (value) => [
@@ -282,7 +291,7 @@ export const InvoiceForm = ({ register, errors, control, watch,setValue }: any) 
                   <Autocomplete
                     {...productAutocompleteProps}
                     {...field}
-            autoHighlight
+                    autoHighlight
                     onChange={(_, value) => {
                       field.onChange(value);
                       setValue(`products.${index}.variant`, value.variants[0]);
