@@ -9,9 +9,11 @@ export const InvoiceEdit = () => {
     register,
     formState: { errors },
     watch,
+    refineCore: { onFinish },
     getValues,
     control,
-    setValue
+    setValue,
+    handleSubmit,
   } = useForm({});
 
   return (
@@ -24,16 +26,31 @@ export const InvoiceEdit = () => {
       footerButtons={({ defaultButtons }) => (
         <>
           <DownloadInvoiceButton getValues={getValues} />
-          {defaultButtons}
+          <div style={{display:"flex",gap:'20px'}}>{defaultButtons}</div>
         </>
       )}
-    saveButtonProps={saveButtonProps}>
+      saveButtonProps={{
+        ...saveButtonProps,
+        onClick: handleSubmit((data) =>
+          onFinish({
+            ...data,
+            exchange_rate: data.exchange_rate || (null as any),
+          })
+        ),
+      }}
+    >
       <Box
         component="form"
         sx={{ display: "flex", flexDirection: "column" }}
         autoComplete="off"
       >
-        <InvoiceForm register={register} errors={errors} watch={watch} control={control} setValue={setValue}/>
+        <InvoiceForm
+          register={register}
+          errors={errors}
+          watch={watch}
+          control={control}
+          setValue={setValue}
+        />
       </Box>
     </Edit>
   );

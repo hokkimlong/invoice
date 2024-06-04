@@ -1,9 +1,9 @@
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import {
+  DateField,
   DeleteButton,
   EditButton,
   List,
-  ShowButton,
   useDataGrid,
 } from "@refinedev/mui";
 import React from "react";
@@ -13,7 +13,7 @@ export const InvoiceList = () => {
     sorters: {
       initial: [
         {
-          field: "id",
+          field: "date",
           order: "desc",
         },
       ],
@@ -23,16 +23,19 @@ export const InvoiceList = () => {
   const columns = React.useMemo<GridColDef[]>(
     () => [
       {
-        field: "id",
-        headerName: "ID",
-        type: "number",
-        minWidth: 50,
-      },
-      {
         field: "invoice_number",
         flex: 1,
         headerName: "Invoice Number",
-        minWidth: 100,
+        minWidth: 50,
+      },
+      {
+        field: "date",
+        flex: 1,
+        headerName: "Date",
+        minWidth: 50,
+        renderCell: function render({ row }) {
+          return <DateField value={row.date ?? new Date()} />;
+        },
       },
       {
         field: "customer",
@@ -55,7 +58,7 @@ export const InvoiceList = () => {
         minWidth: 200,
         renderCell: function render({ row }) {
           return (
-            <div style={{padding:"10px 0"}}>
+            <div style={{ padding: "10px 0" }}>
               {row.products.map((product: any) => (
                 <div>{`${product.product.name} - ${product.variant.name} x ${product.quantity}`}</div>
               ))}
@@ -86,7 +89,12 @@ export const InvoiceList = () => {
 
   return (
     <List>
-      <DataGrid {...dataGridProps} getRowHeight={() => 'auto'} columns={columns} autoHeight />
+      <DataGrid
+        {...dataGridProps}
+        getRowHeight={() => "auto"}
+        columns={columns}
+        autoHeight
+      />
     </List>
   );
 };

@@ -38,7 +38,14 @@ import {
   CustomerShow,
 } from "./pages/customers";
 import { supabaseClient } from "./utility";
-import { InvoiceCreate, InvoiceEdit, InvoiceList, InvoiceShow } from "./pages/invoices";
+import {
+  InvoiceCreate,
+  InvoiceEdit,
+  InvoiceList,
+  InvoiceShow,
+} from "./pages/invoices";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 function App() {
   return (
@@ -49,137 +56,139 @@ function App() {
           <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
           <RefineSnackbarProvider>
             <DevtoolsProvider>
-              <Refine
-                dataProvider={dataProvider(supabaseClient)}
-                liveProvider={liveProvider(supabaseClient)}
-                authProvider={authProvider}
-                routerProvider={routerBindings}
-                notificationProvider={notificationProvider}
-                resources={[
-                  {
-                    name: "products",
-                    list: "/products",
-                    create: "/products/create",
-                    edit: "/products/edit/:id",
-                    show: "/products/show/:id",
-                    meta: {
-                      canDelete: true,
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <Refine
+                  dataProvider={dataProvider(supabaseClient)}
+                  liveProvider={liveProvider(supabaseClient)}
+                  authProvider={authProvider}
+                  routerProvider={routerBindings}
+                  notificationProvider={notificationProvider}
+                  resources={[
+                    {
+                      name: "products",
+                      list: "/products",
+                      create: "/products/create",
+                      edit: "/products/edit/:id",
+                      show: "/products/show/:id",
+                      meta: {
+                        canDelete: true,
+                      },
                     },
-                  },
-                  {
-                    name: "customers",
-                    list: "/customers",
-                    create: "/customers/create",
-                    edit: "/customers/edit/:id",
-                    show: "/customers/show/:id",
-                    meta: {
-                      canDelete: true,
+                    {
+                      name: "customers",
+                      list: "/customers",
+                      create: "/customers/create",
+                      edit: "/customers/edit/:id",
+                      show: "/customers/show/:id",
+                      meta: {
+                        canDelete: true,
+                      },
                     },
-                  },
-                  {
-                    name: "invoices",
-                    list: "/invoices",
-                    create: "/invoices/create",
-                    edit: "/invoices/edit/:id",
-                    show: "/invoices/show/:id",
-                    meta: {
-                      canDelete: true,
+                    {
+                      name: "invoices",
+                      list: "/invoices",
+                      create: "/invoices/create",
+                      edit: "/invoices/edit/:id",
+                      show: "/invoices/show/:id",
+                      meta: {
+                        canDelete: true,
+                      },
                     },
-                  },
-                ]}
-                options={{
-                  syncWithLocation: true,
-                  warnWhenUnsavedChanges: true,
-                  useNewQueryKeys: true,
-                  projectId: "xEJIOJ-lVB5sU-fZDu5z",
-                }}
-              >
-                <Routes>
-                  <Route
-                    element={
-                      <Authenticated
-                        key="authenticated-inner"
-                        fallback={<CatchAllNavigate to="/login" />}
-                      >
-                        <ThemedLayoutV2
-                          Header={() => <Header sticky />}
-                          Title={({ collapsed }) => (
-                            <ThemedTitleV2
-                              collapsed={collapsed}
-                              text="Refine Project"
-                              icon={<AppIcon />}
-                            />
-                          )}
-                        >
-                          <Outlet />
-                        </ThemedLayoutV2>
-                      </Authenticated>
-                    }
-                  >
+                  ]}
+                  options={{
+                    syncWithLocation: true,
+                    warnWhenUnsavedChanges: true,
+                    useNewQueryKeys: true,
+                    projectId: "xEJIOJ-lVB5sU-fZDu5z",
+                  }}
+                >
+                  <Routes>
                     <Route
-                      index
-                      element={<NavigateToResource resource="products" />}
-                    />
-                    <Route path="/products">
-                      <Route index element={<ProductListView />} />
-                      <Route path="create" element={<ProductCreate />} />
-                      <Route path="edit/:id" element={<ProductEdit />} />
-                      <Route path="show/:id" element={<ProductShow />} />
-                    </Route>
-                    <Route path="/customers">
-                      <Route index element={<CustomerList />} />
-                      <Route path="create" element={<CustomerCreate />} />
-                      <Route path="edit/:id" element={<CustomerEdit />} />
-                      <Route path="show/:id" element={<CustomerShow />} />
-                    </Route>
-                    <Route path="/invoices">
-                      <Route index element={<InvoiceList />} />
-                      <Route path="create" element={<InvoiceCreate />} />
-                      <Route path="edit/:id" element={<InvoiceEdit />} />
-                      <Route path="show/:id" element={<InvoiceShow />} />
-                    </Route>
-                    <Route path="*" element={<ErrorComponent />} />
-                  </Route>
-                  <Route
-                    element={
-                      <Authenticated
-                        key="authenticated-outer"
-                        fallback={<Outlet />}
-                      >
-                        <NavigateToResource />
-                      </Authenticated>
-                    }
-                  >
-                    <Route
-                      path="/login"
                       element={
-                        <AuthPage
-                          type="login"
-                          title={
-                            <ThemedTitleV2
-                              collapsed={false}
-                              text="Invoice"
-                              icon={<AppIcon />}
-                            />
-                          }
-                        />
+                        <Authenticated
+                          key="authenticated-inner"
+                          fallback={<CatchAllNavigate to="/login" />}
+                        >
+                          <ThemedLayoutV2
+                            Header={() => <Header sticky />}
+                            Title={({ collapsed }) => (
+                              <ThemedTitleV2
+                                collapsed={collapsed}
+                                text="Refine Project"
+                                icon={<AppIcon />}
+                              />
+                            )}
+                          >
+                            <Outlet />
+                          </ThemedLayoutV2>
+                        </Authenticated>
                       }
-                    />
+                    >
+                      <Route
+                        index
+                        element={<NavigateToResource resource="products" />}
+                      />
+                      <Route path="/products">
+                        <Route index element={<ProductListView />} />
+                        <Route path="create" element={<ProductCreate />} />
+                        <Route path="edit/:id" element={<ProductEdit />} />
+                        <Route path="show/:id" element={<ProductShow />} />
+                      </Route>
+                      <Route path="/customers">
+                        <Route index element={<CustomerList />} />
+                        <Route path="create" element={<CustomerCreate />} />
+                        <Route path="edit/:id" element={<CustomerEdit />} />
+                        <Route path="show/:id" element={<CustomerShow />} />
+                      </Route>
+                      <Route path="/invoices">
+                        <Route index element={<InvoiceList />} />
+                        <Route path="create" element={<InvoiceCreate />} />
+                        <Route path="edit/:id" element={<InvoiceEdit />} />
+                        <Route path="show/:id" element={<InvoiceShow />} />
+                      </Route>
+                      <Route path="*" element={<ErrorComponent />} />
+                    </Route>
                     <Route
-                      path="/register"
-                      element={<AuthPage type="register" />}
-                    />
-                    <Route
-                      path="/forgot-password"
-                      element={<AuthPage type="forgotPassword" />}
-                    />
-                  </Route>
-                </Routes>
+                      element={
+                        <Authenticated
+                          key="authenticated-outer"
+                          fallback={<Outlet />}
+                        >
+                          <NavigateToResource />
+                        </Authenticated>
+                      }
+                    >
+                      <Route
+                        path="/login"
+                        element={
+                          <AuthPage
+                            type="login"
+                            title={
+                              <ThemedTitleV2
+                                collapsed={false}
+                                text="Invoice"
+                                icon={<AppIcon />}
+                              />
+                            }
+                          />
+                        }
+                      />
+                      <Route
+                        path="/register"
+                        element={<AuthPage type="register" />}
+                      />
+                      <Route
+                        path="/forgot-password"
+                        element={<AuthPage type="forgotPassword" />}
+                      />
+                    </Route>
+                  </Routes>
 
-                <RefineKbar />
-                <UnsavedChangesNotifier />
-                <DocumentTitleHandler />
-              </Refine>
+                  <RefineKbar />
+                  <UnsavedChangesNotifier />
+                  <DocumentTitleHandler />
+                </Refine>
+              </LocalizationProvider>
               <DevtoolsPanel />
             </DevtoolsProvider>
           </RefineSnackbarProvider>
