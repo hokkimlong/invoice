@@ -95,11 +95,12 @@ function loadFile(url: any, callback: any) {
 }
 
 const formatPrice = (price: any, riel = false) => {
+  const precision = price.toNumber() % 1 === 0 ? 0 : 2;
   return currencyFormatter.format(price.toNumber(), {
     symbol: riel ? "៛" : "$",
     decimal: ".",
     thousand: ",",
-    precision: riel ? 0 : 2,
+    precision,
     format: "%v%s", // %s is the symbol and %v is the value
   });
 };
