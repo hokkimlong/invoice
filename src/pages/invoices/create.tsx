@@ -178,7 +178,7 @@ export const DownloadInvoiceButton = ({ getValues }: any) => {
         mimeType:
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       }); //Output the document using Data-URI
-      saveAs(out, `invoice-${value.invoice_number}.docx`);
+      saveAs(out, `${value.customer.name}(${value.invoice_number}).docx`);
     });
   };
 
