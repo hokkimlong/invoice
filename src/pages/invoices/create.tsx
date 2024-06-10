@@ -3,14 +3,25 @@ import {
   Box,
   Button,
   Grid,
+  Menu,
+  MenuItem,
   TextField,
   Typography,
-  // DateField
 } from "@mui/material";
 import { Create, useAutocomplete } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
 import React from "react";
 import { Controller, useFieldArray } from "react-hook-form";
+import Big from "big.js";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import {
+  downloadInvoiceDocx,
+  formatPrice,
+} from "../../components/invoice/util";
+import { DownloadInvoicePdf } from "../../components/invoice/PDF";
+import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
+import { Download } from "@mui/icons-material";
 
 export const InvoiceCreate = () => {
   const {
@@ -22,6 +33,7 @@ export const InvoiceCreate = () => {
     formState: { errors },
     watch,
     setValue,
+    trigger,
     handleSubmit,
   } = useForm({
     defaultValues: {
@@ -49,7 +61,13 @@ export const InvoiceCreate = () => {
       }}
       footerButtons={({ defaultButtons }) => (
         <>
-          <DownloadInvoiceButton getValues={getValues} />
+          <DownloadButton
+            getValues={getValues}
+            onBeforeAction={async (action) => {
+              const result = await trigger(null as any, { shouldFocus: true });
+              if (result) action();
+            }}
+          />
           {defaultButtons}
         </>
       )}
@@ -81,129 +99,76 @@ export const InvoiceCreate = () => {
   );
 };
 
-import Docxtemplater from "docxtemplater";
-import PizZip from "pizzip";
-import PizZipUtils from "pizzip/utils/index.js";
-import { saveAs } from "file-saver";
-import currencyFormatter from "currency-formatter";
-import Big from "big.js";
-import { DatePicker } from "@mui/x-date-pickers";
-import dayjs, { Dayjs } from "dayjs";
-
-function loadFile(url: any, callback: any) {
-  PizZipUtils.getBinaryContent(url, callback);
-}
-
-const formatPrice = (price: any, riel = false) => {
-  const precision = price.toNumber() % 1 === 0 ? 0 : 2;
-  return currencyFormatter.format(price.toNumber(), {
-    symbol: riel ? "៛" : "$",
-    decimal: ".",
-    thousand: ",",
-    precision,
-    format: "%v%s", // %s is the symbol and %v is the value
-  });
-};
-
-export const DownloadInvoiceButton = ({ getValues }: any) => {
-  const generateDocument = (
-    options: { exchangeRate: boolean } = { exchangeRate: true }
-  ) => {
-    loadFile("/template/template.docx", function (error: any, content: any) {
-      if (error) {
-        throw error;
-      }
-      const zip = new PizZip(content);
-      const doc = new Docxtemplater(zip, {
-        paragraphLoop: true,
-        linebreaks: true,
-      });
-      const value = getValues();
-      let totalPrice = new Big(0);
-      const products = value.products.map((product: any, index: any) => {
-        const variantPrice = product.variantPrice ?? product.variant.price;
-        const productTotalPrice = new Big(variantPrice).times(product.quantity);
-        totalPrice = totalPrice.add(productTotalPrice);
-        return {
-          index: index + 1,
-          product_name: product.product.name,
-          variant_name: product.variant.name,
-          variant_unit: product.variant.unit,
-          variant_price: formatPrice(new Big(variantPrice)),
-          quantity: product.quantity,
-          total_price: formatPrice(productTotalPrice),
-        };
-      });
-
-      if (products.length < 8) {
-        const diff = 8 - products.length;
-        for (let i = 0; i < diff; i++) {
-          products.push({
-            index: "",
-            product_name: "",
-            variant_name: "",
-            variant_unit: "",
-            variant_price: "",
-            quantity: "",
-            total_price: "",
-          });
-        }
-      }
-
-      const date =
-        typeof value.date === "string"
-          ? new Date(value.date)
-          : new Date(value.date);
-      doc.render({
-        invoice_number: value.invoice_number,
-        sale_name: value.customer.sale_name,
-        customer_name: value.customer.name,
-        customer_phone: value.customer.phone,
-        customer_address: value.customer.address,
-        exchange_rate: !options?.exchangeRate ? "" : value.exchange_rate || "",
-        taxi_phone: value.customer.taxi_phone,
-        products: products,
-        total_price_usd: formatPrice(totalPrice),
-        total_price_riel: !options?.exchangeRate
-          ? ""
-          : value.exchange_rate
-          ? formatPrice(totalPrice.times(value.exchange_rate), true)
-          : "",
-        year: date.getFullYear(),
-        month: date.getMonth() + 1,
-        day: date.getDate(),
-      });
-      const out = doc.getZip().generate({
-        type: "blob",
-        mimeType:
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      }); //Output the document using Data-URI
-      saveAs(out, `${value.customer.name}(${value.invoice_number}).docx`);
-    });
-  };
-
+export const DownloadButton = ({
+  getValues,
+  onBeforeAction = (action) => action(),
+  hideText,
+}: {
+  getValues: () => any;
+  onBeforeAction?: (action: () => void) => void;
+  hideText?: boolean;
+}) => {
   return (
-    <Box>
-      <div style={{ marginBottom: "10px" }}>
-        <Button onClick={() => generateDocument()} variant="contained">
-          Download Invoice
-        </Button>
-      </div>
-      <div>
-        <Button
-          onClick={() =>
-            generateDocument({
-              exchangeRate: false,
-            })
-          }
-          variant="contained"
-        >
-          Download Invoice No Exchange Rate
-        </Button>
-      </div>
-    </Box>
+    <PopupState variant="popover" popupId="demo-popup-menu">
+      {(popupState) => (
+        <React.Fragment>
+          <Button {...bindTrigger(popupState)}>
+            <Download />
+            {!hideText && "Download"}
+          </Button>
+          <Menu {...bindMenu(popupState)}>
+            <DownloadInvoicePdf data={[getValues()]}>
+              {({ handlePrint }) => (
+                <MenuItem
+                  onClick={() => {
+                    onBeforeAction(handlePrint);
+                    popupState.close();
+                  }}
+                >
+                  PDF
+                </MenuItem>
+              )}
+            </DownloadInvoicePdf>
+            <DownloadInvoicePdf
+              data={[getValues()]}
+              options={{ exchangeRate: false }}
+            >
+              {({ handlePrint }) => (
+                <MenuItem
+                  onClick={() => {
+                    onBeforeAction(handlePrint);
+                    popupState.close();
+                  }}
+                >
+                  PDF (No Exchange Rate)
+                </MenuItem>
+              )}
+            </DownloadInvoicePdf>
+            <MenuItem
+              onClick={() => {
+                onBeforeAction(() => downloadInvoiceDocx(getValues()));
+                popupState.close();
+              }}
+            >
+              Word
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                onBeforeAction(() =>
+                  downloadInvoiceDocx(getValues(), { exchangeRate: false })
+                );
+                popupState.close();
+              }}
+            >
+              Word (No Exchange Rate)
+            </MenuItem>
+          </Menu>
+        </React.Fragment>
+      )}
+    </PopupState>
   );
 };
+
 export const InvoiceForm = ({
   register,
   errors,
@@ -307,7 +272,7 @@ export const InvoiceForm = ({
               rules={{ required: "This field is required" }}
               // eslint-disable-next-line
               defaultValue={null as any}
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <Autocomplete
                   {...customerAutocompleteProps}
                   {...field}
@@ -327,7 +292,7 @@ export const InvoiceForm = ({
                       label={"Customer"}
                       margin="normal"
                       variant="outlined"
-                      error={!!(errors as any)?.customer?.id}
+                      error={!!fieldState.error}
                       helperText={(errors as any)?.customer?.id?.message}
                       required
                     />
@@ -345,7 +310,7 @@ export const InvoiceForm = ({
                       name={`products.${index}.product`}
                       rules={{ required: "This field is required" }}
                       defaultValue={controlledField.product}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <Autocomplete
                           {...productAutocompleteProps}
                           {...field}
@@ -373,6 +338,7 @@ export const InvoiceForm = ({
                               label={"Product"}
                               margin="normal"
                               variant="outlined"
+                              error={!!fieldState.error}
                               required
                             />
                           )}
@@ -386,7 +352,7 @@ export const InvoiceForm = ({
                       name={`products.${index}.variant`}
                       rules={{ required: "This field is required" }}
                       defaultValue={controlledField.variant}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <Autocomplete
                           options={controlledField?.product?.variants ?? []}
                           autoHighlight
@@ -407,6 +373,7 @@ export const InvoiceForm = ({
                           renderInput={(params) => (
                             <TextField
                               {...params}
+                              error={!!fieldState.error}
                               label={"Variant"}
                               margin="normal"
                               variant="outlined"

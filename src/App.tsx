@@ -46,6 +46,8 @@ import {
 } from "./pages/invoices";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import './style/style.css'
+
 
 function App() {
   return (

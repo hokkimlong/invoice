@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { Edit } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
-import { DownloadInvoiceButton, InvoiceForm } from "./create";
+import { DownloadButton, InvoiceForm } from "./create";
 
 export const InvoiceEdit = () => {
   const {
@@ -14,6 +14,7 @@ export const InvoiceEdit = () => {
     control,
     setValue,
     handleSubmit,
+    trigger,
   } = useForm({});
 
   return (
@@ -25,8 +26,14 @@ export const InvoiceEdit = () => {
       }}
       footerButtons={({ defaultButtons }) => (
         <>
-          <DownloadInvoiceButton getValues={getValues} />
-          <div style={{display:"flex",gap:'20px'}}>{defaultButtons}</div>
+          <DownloadButton
+            getValues={getValues}
+            onBeforeAction={async (action) => {
+              const result = await trigger(null as any, { shouldFocus: true });
+              if (result) action();
+            }}
+          />
+          <div style={{ display: "flex", gap: "20px" }}>{defaultButtons}</div>
         </>
       )}
       saveButtonProps={{
