@@ -46,20 +46,36 @@ export const DownloadInvoicePdf = ({
   const componentRef = useRef<any>();
   const handlePrint = useReactToPrint({
     content: () => componentRef.current as any,
+    fonts: [
+      {
+        family: "DaunPenhBody",
+        source: "url('/fonts/DaunPenh.ttf')",
+        weight: "normal",
+      },
+      {
+        family: "Calibri",
+        source: "url('/fonts/Calibri.ttf')",
+        weight: "normal",
+      },
+      {
+        family: "Calibri",
+        source: "url('/fonts/Calibrib.ttf')",
+        weight: "bold",
+      },
+    ],
     onBeforeGetContent: () => {
       flushSync(() => {
         setIsPrinting(true);
       });
-      if(content?.length === 1 && content?.[0]){
-        document.title = `${content[0].customer.name}(${content[0].invoice_number})`
-      }else{
-        document.title = `Invoices`
+      if (content?.length === 1 && content?.[0]) {
+        document.title = `${content[0].customer.name}(${content[0].invoice_number})`;
+      } else {
+        document.title = `Invoices`;
       }
     },
     onAfterPrint: () => {
-      setIsPrinting(false),
-      document.title = defaultTitle
-    }
+      setIsPrinting(false), (document.title = defaultTitle);
+    },
   });
 
   return (
@@ -96,7 +112,6 @@ export const DownloadInvoicePdf = ({
 };
 
 export const Invoice = ({ data, options }: InvoiceProps) => {
-  
   const invoiceData = useMemo(() => {
     return getInvoiceData(data, options);
   }, [data]);
