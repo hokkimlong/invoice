@@ -35,6 +35,7 @@ export const DownloadInvoicePdf = ({
   children,
 }: DownloadInvoicePdfProps) => {
   const [isPrinting, setIsPrinting] = useState(false);
+  const [defaultTitle] = useState(document.title);
 
   const [content, setContent] = useState(data);
 
@@ -49,8 +50,16 @@ export const DownloadInvoicePdf = ({
       flushSync(() => {
         setIsPrinting(true);
       });
+      if(content?.length === 1 && content?.[0]){
+        document.title = `${content[0].customer.name}(${content[0].invoice_number})`
+      }else{
+        document.title = `Invoices`
+      }
     },
-    onAfterPrint: () => setIsPrinting(false),
+    onAfterPrint: () => {
+      setIsPrinting(false),
+      document.title = defaultTitle
+    }
   });
 
   return (
@@ -87,27 +96,7 @@ export const DownloadInvoicePdf = ({
 };
 
 export const Invoice = ({ data, options }: InvoiceProps) => {
-  //   const componentRef = useRef();
-  //   const handlePrint = useReactToPrint({
-  //     content: () => componentRef.current as any,
-  //   });
-
-  //   const _products = useMemo(() => {
-  //     const cloneProducts = data.products;
-  //     if (cloneProducts.length < 10) {
-  //       for (let i = 0; i < 10 - cloneProducts.length; i++) {
-  //         cloneProducts.push({
-  //           name: "",
-  //           variantName: "",
-  //           unit: "",
-  //           quantity: "",
-  //           unitPrice: "",
-  //           totalPrice: "",
-  //         });
-  //       }
-  //     }
-  //     return cloneProducts;
-  //   }, [data.products]);
+  
   const invoiceData = useMemo(() => {
     return getInvoiceData(data, options);
   }, [data]);

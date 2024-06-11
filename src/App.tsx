@@ -46,7 +46,6 @@ import {
 } from "./pages/invoices";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import './style/style.css'
 
 
 function App() {
@@ -128,7 +127,7 @@ function App() {
                     >
                       <Route
                         index
-                        element={<NavigateToResource resource="products" />}
+                        element={<NavigateToResource resource="invoices" />}
                       />
                       <Route path="/products">
                         <Route index element={<ProductListView />} />
