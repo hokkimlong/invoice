@@ -11,11 +11,13 @@ import {
   List,
   useDataGrid,
 } from "@refinedev/mui";
-import React, { useState } from "react";
+import React from "react";
 import { DownloadButton } from "./create";
 import { Box, Button } from "@mui/material";
-import { useMany, useOne } from "@refinedev/core";
+import { useMany } from "@refinedev/core";
 import { DownloadInvoicePdf } from "../../components/invoice/PDF";
+import Big from "big.js";
+import { formatPrice } from "../../components/invoice/util";
 
 export const InvoiceList = () => {
   const { dataGridProps } = useDataGrid({
@@ -45,6 +47,17 @@ export const InvoiceList = () => {
         },
       },
       {
+        field: "total_price",
+        headerName: "TotalPrice",
+        minWidth: 120,
+        renderCell: function render({ row }) {
+          if (!row?.total_price) {
+            return "";
+          }
+          return formatPrice(new Big(row?.total_price));
+        },
+      },
+      {
         field: "customer",
         headerName: "Customer",
         minWidth: 350,
@@ -60,7 +73,7 @@ export const InvoiceList = () => {
       {
         field: "products",
         headerName: "Product",
-        minWidth: 350,
+        minWidth: 320,
         renderCell: function render({ row }) {
           return (
             <div style={{ padding: "10px 0" }}>
@@ -121,7 +134,7 @@ export const InvoiceList = () => {
 };
 
 function CustomToolbar({ rowSelectionModel }: any) {
-  const { refetch, data, } = useMany({
+  const { refetch, data } = useMany({
     queryOptions: {
       enabled: false,
     },
@@ -152,7 +165,7 @@ function CustomToolbar({ rowSelectionModel }: any) {
                   handlePrint();
                 }}
               >
-                ({rowSelectionModel.length}) PDF 
+                ({rowSelectionModel.length}) PDF
               </Button>
             )}
           </DownloadInvoicePdf>

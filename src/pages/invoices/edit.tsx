@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { Edit } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
 import { DownloadButton, InvoiceForm } from "./create";
+import Big from "big.js";
 
 export const InvoiceEdit = () => {
   const {
@@ -41,6 +42,13 @@ export const InvoiceEdit = () => {
         onClick: handleSubmit((data) =>
           onFinish({
             ...data,
+            total_price: getValues('products').reduce(
+              (acc: any, cur: any) =>
+                acc.add(
+                  new Big(cur.variantPrice || 0).times(cur.quantity || 1)
+                ),
+            new Big(0)
+            ).toString(),
             exchange_rate: data.exchange_rate || (null as any),
           })
         ),

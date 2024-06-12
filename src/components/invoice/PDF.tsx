@@ -46,23 +46,6 @@ export const DownloadInvoicePdf = ({
   const componentRef = useRef<any>();
   const handlePrint = useReactToPrint({
     content: () => componentRef.current as any,
-    fonts: [
-      {
-        family: "DaunPenhBody",
-        source: "url('/fonts/DaunPenh.ttf')",
-        weight: "normal",
-      },
-      {
-        family: "Calibri",
-        source: "url('/fonts/Calibri.ttf')",
-        weight: "normal",
-      },
-      {
-        family: "Calibri",
-        source: "url('/fonts/Calibrib.ttf')",
-        weight: "bold",
-      },
-    ],
     onBeforeGetContent: () => {
       flushSync(() => {
         setIsPrinting(true);
@@ -93,9 +76,9 @@ export const DownloadInvoicePdf = ({
             <>
               <style>
                 {`
-            @page {
-                size: A4 portrait;
-            }
+                @page {
+                  size: A4 portrait;
+                }
             `}
               </style>
               <div>
@@ -121,6 +104,9 @@ export const Invoice = ({ data, options }: InvoiceProps) => {
       <div style={{ pageBreakBefore: "always" }}>
         <Box
           sx={{
+            "& *":{
+              color: "black!important",
+            },
             "& td": {
               fontSize: "25px",
               fontFamily: "DaunPenhBody",

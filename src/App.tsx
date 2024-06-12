@@ -46,7 +46,10 @@ import {
 } from "./pages/invoices";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-
+import "./style/style.css";
+import WidgetsIcon from "@mui/icons-material/Widgets";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import PersonIcon from "@mui/icons-material/Person";
 
 function App() {
   return (
@@ -66,6 +69,17 @@ function App() {
                   notificationProvider={notificationProvider}
                   resources={[
                     {
+                      name: "invoices",
+                      list: "/invoices",
+                      create: "/invoices/create",
+                      edit: "/invoices/edit/:id",
+                      show: "/invoices/show/:id",
+                      meta: {
+                        canDelete: true,
+                        icon: <ReceiptIcon />,
+                      },
+                    },
+                    {
                       name: "products",
                       list: "/products",
                       create: "/products/create",
@@ -73,6 +87,7 @@ function App() {
                       show: "/products/show/:id",
                       meta: {
                         canDelete: true,
+                        icon: <WidgetsIcon />,
                       },
                     },
                     {
@@ -83,16 +98,7 @@ function App() {
                       show: "/customers/show/:id",
                       meta: {
                         canDelete: true,
-                      },
-                    },
-                    {
-                      name: "invoices",
-                      list: "/invoices",
-                      create: "/invoices/create",
-                      edit: "/invoices/edit/:id",
-                      show: "/invoices/show/:id",
-                      meta: {
-                        canDelete: true,
+                        icon: <PersonIcon />,
                       },
                     },
                   ]}
@@ -115,7 +121,7 @@ function App() {
                             Title={({ collapsed }) => (
                               <ThemedTitleV2
                                 collapsed={collapsed}
-                                text="Refine Project"
+                                text="Invoice Management"
                                 icon={<AppIcon />}
                               />
                             )}
@@ -163,6 +169,9 @@ function App() {
                         path="/login"
                         element={
                           <AuthPage
+                            registerLink={false}
+                            forgotPasswordLink={false}
+                            rememberMe={false}
                             type="login"
                             title={
                               <ThemedTitleV2
@@ -174,14 +183,14 @@ function App() {
                           />
                         }
                       />
-                      <Route
+                      {/* <Route
                         path="/register"
                         element={<AuthPage type="register" />}
                       />
                       <Route
                         path="/forgot-password"
                         element={<AuthPage type="forgotPassword" />}
-                      />
+                      /> */}
                     </Route>
                   </Routes>
 

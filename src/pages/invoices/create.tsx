@@ -41,6 +41,7 @@ export const InvoiceCreate = () => {
       exchange_rate: 4045,
       invoice_number: "",
       customer: null,
+      total_price: 0,
       products: [
         {
           product: null,
@@ -77,6 +78,13 @@ export const InvoiceCreate = () => {
         onClick: handleSubmit((data) =>
           onFinish({
             ...data,
+            total_price: getValues('products').reduce(
+              (acc: any, cur: any) =>
+                acc.add(
+                  new Big(cur.variantPrice || 0).times(cur.quantity || 1)
+                ),
+            new Big(0)
+            ).toNumber(),
             exchange_rate: data.exchange_rate || (null as any),
           })
         ),

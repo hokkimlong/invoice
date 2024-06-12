@@ -1,7 +1,7 @@
 @font-face {
   font-family: "DaunPenhBody";
   font-display: swap;
-  src: url("/fonts/DaunPenh.ttf") format("truetype");
+  src: url("./fonts/DaunPenh.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
@@ -9,7 +9,7 @@
 @font-face {
   font-family: "Calibri";
   font-display: swap;
-  src: url("/fonts/Calibri.ttf") format("truetype");
+  src: url("./fonts/Calibri.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
@@ -17,7 +17,7 @@
 @font-face {
   font-family: "Calibri";
   font-display: swap;
-  src: url("/fonts/Calibrib.ttf") format("truetype");
+  src: url("./fonts/Calibrib.ttf") format("truetype");
   font-weight: bold;
-  font-style: normal;
+  font-style: bold;
 }
