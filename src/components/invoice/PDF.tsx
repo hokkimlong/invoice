@@ -83,7 +83,10 @@ export const DownloadInvoicePdf = ({
               </style>
               <div>
                 {content?.map((invoice) => (
-                  <Invoice data={invoice} options={options} />
+                  <Invoice
+                    data={invoice}
+                    options={options}
+                  />
                 ))}
               </div>
             </>
@@ -104,7 +107,7 @@ export const Invoice = ({ data, options }: InvoiceProps) => {
       <div style={{ pageBreakBefore: "always" }}>
         <Box
           sx={{
-            "& *":{
+            "& *": {
               color: "black!important",
             },
             "& td": {

@@ -9,23 +9,53 @@ import {
   DeleteButton,
   EditButton,
   List,
+  useAutocomplete,
   useDataGrid,
 } from "@refinedev/mui";
 import React from "react";
 import { DownloadButton } from "./create";
-import { Box, Button } from "@mui/material";
-import { useMany } from "@refinedev/core";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  TextField,
+} from "@mui/material";
+import { useList, useMany } from "@refinedev/core";
 import { DownloadInvoicePdf } from "../../components/invoice/PDF";
 import Big from "big.js";
 import { formatPrice } from "../../components/invoice/util";
+import DateRangePicker from "../../components/date-picker";
+import dayjs, { Dayjs } from "dayjs";
+import { Clear, FilterAlt, ImportExport } from "@mui/icons-material";
+import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
+import { flushSync } from "react-dom";
+
+const defaultDateRange = [dayjs().startOf("month"), dayjs().endOf("month")];
 
 export const InvoiceList = () => {
-  const { dataGridProps } = useDataGrid({
+  const { dataGridProps, setFilters, filters } = useDataGrid({
     sorters: {
       initial: [
         {
           field: "date",
           order: "desc",
+        },
+      ],
+    },
+    syncWithLocation: false,
+    filters: {
+      initial: [
+        {
+          field: "date",
+          operator: "gte",
+          value: defaultDateRange[0].toISOString(),
+        },
+        {
+          field: "date",
+          operator: "lte",
+          value: defaultDateRange[1].toISOString(),
         },
       ],
     },
@@ -114,18 +144,23 @@ export const InvoiceList = () => {
         getRowHeight={() => "auto"}
         columns={columns}
         checkboxSelection
+        disableColumnFilter
+        disableColumnMenu
         slots={{
           toolbar: CustomToolbar,
         }}
         slotProps={{
           toolbar: {
             rowSelectionModel,
+            setFilters,
+            filters,
+            rowCount: dataGridProps.rowCount,
           },
         }}
-        onRowSelectionModelChange={(newRowSelectionModel, details) => {
-          console.log("newRowSelectionModel", newRowSelectionModel);
+        onRowSelectionModelChange={(newRowSelectionModel) => {
           setRowSelectionModel(newRowSelectionModel);
         }}
+        keepNonExistentRowsSelected
         rowSelectionModel={rowSelectionModel}
         autoHeight
       />
@@ -133,8 +168,13 @@ export const InvoiceList = () => {
   );
 };
 
-function CustomToolbar({ rowSelectionModel }: any) {
-  const { refetch, data } = useMany({
+function CustomToolbar({
+  rowSelectionModel,
+  setFilters,
+  rowCount,
+  filters,
+}: any) {
+  const { refetch } = useMany({
     queryOptions: {
       enabled: false,
     },
@@ -142,65 +182,174 @@ function CustomToolbar({ rowSelectionModel }: any) {
     ids: rowSelectionModel,
   });
 
+  const { refetch: refetchAll } = useList({
+    queryOptions: {
+      enabled: false,
+    },
+    resource: "invoices",
+    filters,
+    pagination: {
+      pageSize: rowCount,
+    },
+  });
+
+  const [dateRange, setDateRange] =
+    React.useState<(Dayjs | null)[]>(defaultDateRange);
+
+  const [customerId, setCustomerId] = React.useState<string | null>(null);
+
+  const handlePrintPdf = ({ label }: any, popupState: any) => {
+    return ({ handlePrint, setContent }: any) => (
+      <MenuItem
+        onClick={() => {
+          popupState.close();
+          if (rowSelectionModel.length === 0) {
+            refetchAll()
+              .then((res) => {
+                flushSync(() => {
+                  setContent((res?.data?.data as any) ?? []);
+                });
+                handlePrint();
+              })
+              .catch((e) => {
+                console.error(e);
+              });
+          } else {
+            refetch()
+              .then((res) => {
+                flushSync(() => {
+                  setContent((res?.data?.data as any) ?? []);
+                });
+                handlePrint();
+              })
+              .catch((e) => {
+                console.error(e);
+              });
+          }
+        }}
+      >
+        {label}
+      </MenuItem>
+    );
+  };
+
+  const { autocompleteProps: customerAutocompleteProps } = useAutocomplete({
+    resource: "customers",
+    onSearch: (value) => [
+      {
+        field: "name",
+        operator: "contains",
+        value,
+      },
+    ],
+  });
+
   return (
-    <GridToolbarContainer>
-      {rowSelectionModel.length > 0 && (
+    <GridToolbarContainer
+      sx={{ display: "flex", justifyContent: "space-between" }}
+    >
+      <Box my={2} display={"flex"} gap={1}>
+        <DateRangePicker
+          value={dateRange}
+          onChange={(value) => {
+            setDateRange(value);
+          }}
+        />
+        <Autocomplete
+          {...customerAutocompleteProps}
+          onChange={(_, value) => {
+            setCustomerId(value?.id);
+          }}
+          autoHighlight
+          getOptionLabel={(item) => {
+            return `${item?.name} - ${item?.phone} - ${item?.address}`;
+          }}
+          isOptionEqualToValue={(option, value) => {
+            return option.id === value.id;
+          }}
+          size="small"
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              style={{ margin: 0, minWidth: "300px" }}
+              size="small"
+              label={"Customer"}
+              margin="normal"
+              variant="outlined"
+            />
+          )}
+        />
+        <Button
+          onClick={() => {
+            setFilters([
+              {
+                field: "date",
+                operator: "gte",
+                value: dateRange[0]?.toISOString(),
+              },
+              {
+                field: "date",
+                operator: "lte",
+                value: dateRange[1]?.toISOString(),
+              },
+              ...(
+                customerId
+                  ? [
+                      {
+                        field: "customer_id",
+                        operator: "eq",
+                        value: customerId,
+                      },
+                    ]
+                  : []
+              )
+            ]);
+          }}
+          startIcon={<FilterAlt />}
+          variant="outlined"
+        >
+          Filter
+        </Button>
+        <Button onClick={()=>{
+          setFilters([]);
+          setDateRange([null,null]);
+          setCustomerId(null);
+        }} startIcon={<Clear/>} variant="outlined" >
+          Clear
+        </Button>
+      </Box>
+      {rowCount > 0 && (
         <Box sx={{ my: 1, display: "flex", gap: 1 }}>
-          <DownloadInvoicePdf>
-            {({ handlePrint, setContent }) => (
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  if (
-                    !isSame(
-                      rowSelectionModel,
-                      (data?.data ?? []).map((d: any) => d.id)
-                    )
-                  ) {
-                    const res = await refetch();
-                    setContent((res?.data?.data as any) ?? []);
-                  } else {
-                    setContent((data?.data as any) ?? []);
-                  }
-                  handlePrint();
-                }}
-              >
-                ({rowSelectionModel.length}) PDF
-              </Button>
+          <PopupState variant="popover" popupId="demo-popup-menu">
+            {(popupState) => (
+              <React.Fragment>
+                <Button
+                  startIcon={<ImportExport />}
+                  {...bindTrigger(popupState)}
+                  variant="outlined"
+                >
+                  Export{" "}
+                  {rowSelectionModel.length >= 1
+                    ? rowSelectionModel.length
+                    : rowCount}
+                </Button>
+                <Menu {...bindMenu(popupState)}>
+                  <DownloadInvoicePdf>
+                    {handlePrintPdf({ label: "PDF" }, popupState)}
+                  </DownloadInvoicePdf>
+                  <DownloadInvoicePdf options={{ exchangeRate: false }}>
+                    {handlePrintPdf(
+                      { label: "PDF (No Exchange Rate)" },
+                      popupState
+                    )}
+                  </DownloadInvoicePdf>
+                </Menu>
+              </React.Fragment>
             )}
-          </DownloadInvoicePdf>
-          <DownloadInvoicePdf options={{ exchangeRate: false }}>
-            {({ handlePrint, setContent }) => (
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  if (
-                    !isSame(
-                      rowSelectionModel,
-                      (data?.data ?? []).map((d: any) => d.id)
-                    )
-                  ) {
-                    const res = await refetch();
-                    setContent((res?.data?.data as any) ?? []);
-                  } else {
-                    setContent((data?.data as any) ?? []);
-                  }
-                  handlePrint();
-                }}
-              >
-                ({rowSelectionModel.length}) PDF (No Exchange Rate){" "}
-              </Button>
-            )}
-          </DownloadInvoicePdf>
+          </PopupState>
         </Box>
       )}
     </GridToolbarContainer>
   );
 }
 
-const isSame = (array1: any, array2: any) => {
-  return (
-    array1.length === array2.length &&
-    array1.every((value: any) => array2.includes(value))
-  );
-};

@@ -10,6 +10,7 @@ import React from "react";
 
 export const ProductListView = () => {
   const { dataGridProps } = useDataGrid({
+    syncWithLocation: false,
     sorters: {
       initial: [
         {

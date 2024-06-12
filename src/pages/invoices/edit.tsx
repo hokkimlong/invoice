@@ -49,6 +49,7 @@ export const InvoiceEdit = () => {
                 ),
             new Big(0)
             ).toString(),
+            customer_id: data.customer.id,
             exchange_rate: data.exchange_rate || (null as any),
           })
         ),

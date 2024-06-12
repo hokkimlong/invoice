@@ -41,6 +41,7 @@ export const InvoiceCreate = () => {
       exchange_rate: 4045,
       invoice_number: "",
       customer: null,
+      customer_id: null,
       total_price: 0,
       products: [
         {
@@ -85,6 +86,7 @@ export const InvoiceCreate = () => {
                 ),
             new Big(0)
             ).toNumber(),
+            customer_id: (data.customer as any)?.id ,
             exchange_rate: data.exchange_rate || (null as any),
           })
         ),
