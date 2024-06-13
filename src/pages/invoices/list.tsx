@@ -39,6 +39,10 @@ export const InvoiceList = () => {
     sorters: {
       initial: [
         {
+          field: "invoice_number",
+          order: "desc",
+        },
+        {
           field: "date",
           order: "desc",
         },

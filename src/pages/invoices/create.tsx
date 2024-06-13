@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { Create, useAutocomplete } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
-import React from "react";
+import React, { useEffect } from "react";
 import { Controller, useFieldArray } from "react-hook-form";
 import Big from "big.js";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -22,6 +22,7 @@ import {
 import { DownloadInvoicePdf } from "../../components/invoice/PDF";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { Download } from "@mui/icons-material";
+import { useList, } from "@refinedev/core";
 
 export const InvoiceCreate = () => {
   const {
@@ -38,7 +39,7 @@ export const InvoiceCreate = () => {
   } = useForm({
     defaultValues: {
       date: dayjs(),
-      exchange_rate: 4045,
+      exchange_rate: "",
       invoice_number: "",
       customer: null,
       customer_id: null,
@@ -79,14 +80,16 @@ export const InvoiceCreate = () => {
         onClick: handleSubmit((data) =>
           onFinish({
             ...data,
-            total_price: getValues('products').reduce(
-              (acc: any, cur: any) =>
-                acc.add(
-                  new Big(cur.variantPrice || 0).times(cur.quantity || 1)
-                ),
-            new Big(0)
-            ).toNumber(),
-            customer_id: (data.customer as any)?.id ,
+            total_price: getValues("products")
+              .reduce(
+                (acc: any, cur: any) =>
+                  acc.add(
+                    new Big(cur.variantPrice || 0).times(cur.quantity || 1)
+                  ),
+                new Big(0)
+              )
+              .toNumber(),
+            customer_id: (data.customer as any)?.id,
             exchange_rate: data.exchange_rate || (null as any),
           })
         ),
@@ -98,6 +101,7 @@ export const InvoiceCreate = () => {
         autoComplete="off"
       >
         <InvoiceForm
+          isCreateForm
           register={register}
           errors={errors}
           control={control}
@@ -185,7 +189,45 @@ export const InvoiceForm = ({
   control,
   watch,
   setValue,
+  isCreateForm,
 }: any) => {
+  const { data } = useList({
+    queryOptions: {
+      enabled: isCreateForm,
+    },
+    resource: "invoices",
+    sorters: [
+      {
+        field: "invoice_number",
+        order: "desc",
+      },
+      {
+        field: "date",
+        order: "desc",
+      },
+    ],
+    pagination: {
+      pageSize: 1,
+    },
+  });
+
+  useEffect(() => {
+    if (data) {
+      try {
+        const lastInvoice = data?.data[0].invoice_number;
+        const invoiceNumber = lastInvoice.split("-")[1];
+        if (isNaN(parseInt(invoiceNumber)) === false) {
+          setValue(
+            "invoice_number",
+            `2024-${(parseInt(invoiceNumber) + 1).toString().padStart(4, "0")}`
+          );
+        }
+      } catch (e) {
+        setValue("invoice_number", "2024-");
+      }
+    }
+  }, [data]);
+
   const { autocompleteProps: customerAutocompleteProps } = useAutocomplete({
     resource: "customers",
     onSearch: (value) => [
@@ -229,7 +271,15 @@ export const InvoiceForm = ({
             required: "This field is required",
           })}
           error={!!(errors as any)?.invoice_number}
-          helperText={(errors as any)?.invoice_number?.message}
+          helperText={
+            isCreateForm &&
+            data &&
+            data.data.length > 0 && (
+              <Typography variant="caption">
+                Last Invoice: {data.data[0].invoice_number}
+              </Typography>
+            )
+          }
           margin="normal"
           fullWidth
           InputLabelProps={{ shrink: true }}
