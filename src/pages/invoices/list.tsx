@@ -42,11 +42,10 @@ export const InvoiceList = () => {
           field: "invoice_number",
           order: "desc",
         },
-        {
-          field: "date",
-          order: "desc",
-        },
       ],
+    },
+    pagination: {
+      pageSize: 100,
     },
     syncWithLocation: false,
     filters: {
@@ -296,17 +295,15 @@ function CustomToolbar({
                 operator: "lte",
                 value: dateRange[1]?.toISOString(),
               },
-              ...(
-                customerId
-                  ? [
-                      {
-                        field: "customer_id",
-                        operator: "eq",
-                        value: customerId,
-                      },
-                    ]
-                  : []
-              )
+              ...(customerId
+                ? [
+                    {
+                      field: "customer_id",
+                      operator: "eq",
+                      value: customerId,
+                    },
+                  ]
+                : []),
             ]);
           }}
           startIcon={<FilterAlt />}
@@ -314,11 +311,15 @@ function CustomToolbar({
         >
           Filter
         </Button>
-        <Button onClick={()=>{
-          setFilters([]);
-          setDateRange([null,null]);
-          setCustomerId(null);
-        }} startIcon={<Clear/>} variant="outlined" >
+        <Button
+          onClick={() => {
+            setFilters([]);
+            setDateRange([null, null]);
+            setCustomerId(null);
+          }}
+          startIcon={<Clear />}
+          variant="outlined"
+        >
           Clear
         </Button>
       </Box>
@@ -356,4 +357,3 @@ function CustomToolbar({
     </GridToolbarContainer>
   );
 }
-
